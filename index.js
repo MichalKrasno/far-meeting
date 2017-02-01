@@ -7,7 +7,7 @@
 
 
 // Options
-const options = {
+var options = {
   port: 8080
 };
 
@@ -16,8 +16,8 @@ var bodyParser = require('body-parser');
 var http = require('http');
 var nunjucks = require('nunjucks');
 
-const app = express();
-const server = new http.Server(app);
+var app = express();
+var server = new http.Server(app);
 
 app.use(bodyParser.json());
 app.use(express.static(`${__dirname}`));
@@ -30,8 +30,8 @@ nunjucks.configure('views', {
 });
 
 app.get('/', (req, res) => {
-  const ipv4 = req.clientIp;
-  const geo = (ipv4 ? geoip.lookup(ipv4) : null);
+  var ipv4 = req.clientIp;
+  var geo = (ipv4 ? geoip.lookup(ipv4) : null);
 
   res.render('index.html', {
     dataToBePassedToClient: 'abc',
