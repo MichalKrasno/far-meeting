@@ -11,10 +11,10 @@ const options = {
   port: 8080
 };
 
-import express from 'express';
-import bodyParser from 'body-parser';
-import http from 'http';
-import nunjucks from 'nunjucks';
+var express = require('express');
+var bodyParser = require('body-parser');
+var http = require('http');
+var nunjucks = require('nunjucks');
 
 const app = express();
 const server = new http.Server(app);
