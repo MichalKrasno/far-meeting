@@ -1,8 +1,8 @@
 ///NOTES
 // Create a folder called "public" with a folder called "views". This is where index.html will live (public/views/index.html)
- - https://github.com/sblaurock/evalsh/blob/master/Procfile
- - web: node index.js
- - https://github.com/sblaurock/evalsh
+// - https://github.com/sblaurock/evalsh/blob/master/Procfile
+// - web: node index.js
+// - https://github.com/sblaurock/evalsh
 /// ---
 
 
