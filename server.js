@@ -8,10 +8,6 @@ router.use(function (req,res,next) {
   next();
 });
 
-router.get("/",function(req,res){
-  res.sendFile(path + "index.html");
-});
-
 app.use("/",router);
 app.use('/vendor', express.static('vendor'));
 app.use('/less', express.static('less'));
@@ -19,8 +15,8 @@ app.use('/js', express.static('js'));
 app.use('/img', express.static('img'));
 app.use('/css', express.static('css'));
 
-app.use("*",function(req,res){
-  res.sendFile(path + "404.html");
+router.get("/",function(req,res){
+  res.sendFile(path + "index.html");
 });
 
 app.listen(process.env.PORT || 3000,function(){
