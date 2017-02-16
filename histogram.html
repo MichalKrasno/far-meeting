@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Meeting's Histogram</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+    <style>
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container" style="width: 75%;">
+        <canvas id="canvas"></canvas>
+    </div>
+    <script>
+        var ctx = document.getElementById('canvas').getContext('2d');
+        var data = [24, 39, 3, 0, 0, 1, 1, 0, 0, 0];
+
+        var histogram = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+                datasets: [{
+                    label: 'Meeting count',
+                    data: data,
+                    backgroundColor: "rgba(59,172,191,0.7)"
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: 'Your historical meeting data'
+                },
+                legend: {
+                    display: false
+                },
+                scales: {
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: '# of people invited to meeting'
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: '# of meetings'
+                        }
+                    }]
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
