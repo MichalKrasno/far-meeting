@@ -183,7 +183,8 @@ function getEvents(auth, calId) {
 }
 
 /**
- * Lists the last 10 events on the user's primary calendar by name and # of attendees.
+ * Lists all events in the last 30 days for all calendars that the authorized user can seen
+ * Also calculates the histogram of # of meetings by # of attendees
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */

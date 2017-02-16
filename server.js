@@ -18,6 +18,9 @@ app.use('/css', express.static('css'));
 router.get("/",function(req,res){
   res.sendFile(path + "index.html");
 });
+router.get("/histogram.html", function(req,res){
+  res.sendFile(path + "histogram.html")
+});
 
 app.listen(process.env.PORT || 3000,function(){
   console.log("Live at Port 3000 or " + process.env.PORT);
