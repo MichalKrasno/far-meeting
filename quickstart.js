@@ -7,7 +7,7 @@ var googleAuth = require('google-auth-library');
 // at ~/.credentials/calendar-nodejs-quickstart.json
 var SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
-  process.env.USERPROFILE) + '/.credentials/';
+    process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'calendar-nodejs-quickstart.json';
 
 // Load client secrets from a local file.
@@ -18,7 +18,7 @@ fs.readFile('client_secret.json', function processClientSecrets(err, content) {
   }
   // Authorize a client with the loaded credentials, then call the
   // Google Calendar API.
-  authorize(JSON.parse(content), listEvents);
+  authorize(JSON.parse(content), eventslist);
 });
 
 /**
@@ -99,8 +99,8 @@ function storeToken(token) {
  * Retrive and store the calendarId of every calendar the authorized user has access to.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function getCalendarIds(auth) {
-  return new Promise(function (resolve, reject) {
+function getCalendarIds(auth,callback) {
+
     var calendar = google.calendar('v3');
 
     calendar.calendarList.list({
@@ -111,6 +111,7 @@ function getCalendarIds(auth) {
         return;
       }
       var calendars = response.items;
+        console.log("Calendars " + calendars[1].id);
       var calendarIds = [];
       if (calendars.length == 0) {
         console.log('No calendars found.');
@@ -123,19 +124,19 @@ function getCalendarIds(auth) {
             calendarIds.push(cal.id);
           }
         }
-        console.log(calendarIds);
-        resolve(calendarIds);
+        console.log("ids- " + calendarIds);
+        callback(calendarIds);
       }
     });
-  })
+
 }
 
 /**
  * Retrieve and store all events in the last 30 days of a particular calendarId
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function getEvents(auth, calId) {
-  return new Promise(function (resolve, reject) {
+function getEvents(auth, calId,callback) {
+
     var calendar = google.calendar('v3');
     var filteredEvents = [];
 
@@ -153,15 +154,17 @@ function getEvents(auth, calId) {
         return;
       }
       var events = response.items;
+        console.log("events"+events[0].attendees.length)
       if (events.length == 0) {
-        console.log('No events found.');
+        console.log('No events foundattendees.');
       } else {
         console.log('All events in last 30 days for calendar:', calId);
+
         for (var i = 0; i < events.length; i++) {
           var event = events[i];
           try {
             var numattendees = event.attendees.length; //Sometimes events can have no attendees
-            // TODO: Need to check if any of the attendees are a 'resource' and remove them from the count, otherwise we're overcounting. 
+            // TODO: Need to check if any of the attendees are a 'resource' and remove them from the count, otherwise we're overcounting.
             // attendees[i].resource = true; https://developers.google.com/google-apps/calendar/v3/reference/events
             var start = event.start.dateTime; //All day event's have event.start.date instead
             if (start == undefined) throw "All day event";
@@ -170,16 +173,16 @@ function getEvents(auth, calId) {
 
             //console.log('%s - %s - %s - %s - %s', event.id, start, duration, numattendees, event.summary);
             filteredEvents.push(event);
-
+            console.log("event" + event);
           } catch (error) {
-            //console.log(error);    
+            //console.log(error);
             //Do nothing as we don't care about events that are all day or have no attendees
           }
         }
-        resolve(filteredEvents);
+        callback(filteredEvents);
       }
     });
-  })
+
 }
 
 /**
@@ -188,56 +191,114 @@ function getEvents(auth, calId) {
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
+
+function eventslist(auth){
+
+    getCalendarIds(auth,function (calId) {
+
+        getEvents(auth, calId,function (allCalendarsEvents) {
+console.log("a1" + allCalendarsEvents)
+            var allEvents = [];
+            var allEventsDeduped = [];
+            var histogram = [];
+            for (var i = 0; i <= 30; i++){ histogram.push(0);} //initialize histogram to all 0's
+
+            for (var i = 0; i < allCalendarsEvents.length; i++) {
+                if (allCalendarsEvents[i].length > 0) { //Check to make sure the calendar isn't empty
+                    for (var j = 0; j < allCalendarsEvents[i].length; j++) {
+                        var event = allCalendarsEvents[i][j];
+                        //console.log('dummy test')
+                        //console.log('%s - %s - %s - %s - %s', event.id, event.start.dateTime, event.attendees.length, event.summary);
+                        allEvents.push(event); //create an array of all the events from all calendars
+                    }
+                }
+            }
+            allEventsDeduped.push(allEvents[0]); //Seed the dedupe list with the first event so there's something to compare below
+            for (var i = 0; i < allEvents.length; i++) {
+                for (var j = 0; j < allEventsDeduped.length; j++) {
+                    if (allEvents[i].id == allEventsDeduped[j].id) { //If the event is already in the dedupe list, skip it
+                        break;
+                    }
+                    if (j == allEventsDeduped.length - 1) { //if you get to the end of the dedupe list and havn't seen this event, add it to the dedupe list
+                        allEventsDeduped.push(allEvents[i]);
+                    }
+                }
+            }
+
+            //Build the histogram data
+            for (var i = 0; i <= 30; i++){
+                for (var j = 0; j < allEventsDeduped.length; j++){
+                    if (allEventsDeduped[j].attendees.length == i){
+                        histogram[i]++;
+                    }
+                }
+            }
+            console.log(histogram);
+
+        })
+
+
+
+        })
+
+
+
+}
+
 function listEvents(auth) {
   var calendar = google.calendar('v3');
 
-  getCalendarIds(auth)
-    .then(function (calendarIds) {
-      return Promise.all(calendarIds.map(function (id) {
-        return getEvents(auth, id);
-      }))
-    })
-    .then(function (allCalendarsEvents) {
-      var allEvents = [];
-      var allEventsDeduped = [];
-      var histogram = [];
-      for (var i = 0; i <= 30; i++){ histogram.push(0);} //initialize histogram to all 0's
+ var a =  getCalendarIds(auth)
+      .then(function (calendarIds) {
+        return Promise.all(calendarIds.map(function (id) {
+          return getEvents(auth, id);
+        }))
+      });
 
-      for (var i = 0; i < allCalendarsEvents.length; i++) {
-        if (allCalendarsEvents[i].length > 0) { //Check to make sure the calendar isn't empty
-          for (var j = 0; j < allCalendarsEvents[i].length; j++) {
-            var event = allCalendarsEvents[i][j];
-            //console.log('dummy test')
-            //console.log('%s - %s - %s - %s - %s', event.id, event.start.dateTime, event.attendees.length, event.summary);
-            allEvents.push(event); //create an array of all the events from all calendars
+  console.log("aas"+a.length);
+     /* .then(function (allCalendarsEvents) {
+        var allEvents = [];
+        var allEventsDeduped = [];
+        var histogram = [];
+        for (var i = 0; i <= 30; i++){ histogram.push(0);} //initialize histogram to all 0's
+
+        for (var i = 0; i < allCalendarsEvents.length; i++) {
+          if (allCalendarsEvents[i].length > 0) { //Check to make sure the calendar isn't empty
+            for (var j = 0; j < allCalendarsEvents[i].length; j++) {
+              var event = allCalendarsEvents[i][j];
+              //console.log('dummy test')
+              //console.log('%s - %s - %s - %s - %s', event.id, event.start.dateTime, event.attendees.length, event.summary);
+              allEvents.push(event); //create an array of all the events from all calendars
+            }
           }
         }
-      }
-      allEventsDeduped.push(allEvents[0]); //Seed the dedupe list with the first event so there's something to compare below
-      for (var i = 0; i < allEvents.length; i++) {
-        for (var j = 0; j < allEventsDeduped.length; j++) {
-          if (allEvents[i].id == allEventsDeduped[j].id) { //If the event is already in the dedupe list, skip it
-            break;
-          }
-          if (j == allEventsDeduped.length - 1) { //if you get to the end of the dedupe list and havn't seen this event, add it to the dedupe list
-            allEventsDeduped.push(allEvents[i]);
-          }
-        }
-      }
+        console.log("4-" + allEvents);
 
-      //Build the histogram data
-      for (var i = 0; i <= 30; i++){
-        for (var j = 0; j < allEventsDeduped.length; j++){
-          if (allEventsDeduped[j].attendees.length == i){
-            histogram[i]++;
+        allEventsDeduped.push(allEvents[0]); //Seed the dedupe list with the first event so there's something to compare below
+        console.log("4-" + allEventsDeduped);
+
+        for (var i = 0; i < allEvents.length; i++) {
+          for (var j = 0; j < allEventsDeduped.length; j++) {
+            if (allEvents[i].id == allEventsDeduped[j].id) { //If the event is already in the dedupe list, skip it
+              break;
+            }
+            if (j == allEventsDeduped.length - 1) { //if you get to the end of the dedupe list and havn't seen this event, add it to the dedupe list
+              allEventsDeduped.push(allEvents[i]);
+            }
           }
         }
-      }
-      console.log(histogram);
+console.log("5-" + allEventsDeduped);
+        //Build the histogram data
+        for (var i = 0; i <= 30; i++){
+          for (var j = 0; j < allEventsDeduped.length; j++){
 
-    })
-    .catch(function (error) {
-      console.log('Caught error', error);
-    });
+          }
+        }
+        console.log(histogram);
 
+      })
+      .catch(function (error) {
+        console.log('Caught error', error);
+      });
+*/
 }
