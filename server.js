@@ -18,9 +18,9 @@ var filtering = require("./filtering");
 
 //Google API info
 var oauth2Client = new OAuth2(
-    "303978784401-bsho9e40sv2gbstjor65rb1iakmpmekj.apps.googleusercontent.com", //client_id
-    "NPfZJiDwRIWGH9_Xfkiwlq75", // Secret
-    "http://localhost:3000/histogram" //Redirection URL - Should match with redirect url in google console
+    "963711263702-rfkieaohjall5iaci8258216qajdlt1u.apps.googleusercontent.com", //client_id
+    "lJzore0LfsSa6EJzD3sIj2LY", // Secret
+    "https://calendartest25.herokuapp.com/histogram" //Redirection URL - Should match with redirect url in google console
 );
 
 
