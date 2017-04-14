@@ -9,7 +9,7 @@ function getCalendarIds(auth) {
             auth: auth
         }, function (err, response) {
             if (err) {
-                console.log('The API returned an error: ' + err);
+                console.log('The API returned an error in getCalendarIds: ' + err);
                 return;
             }
             var calendars = response.items;
@@ -20,8 +20,8 @@ function getCalendarIds(auth) {
                 console.log('All calendars this user has access to:')
                 for (var i = 0; i < calendars.length; i++) {
                     var cal = calendars[i];
-                    //console.log('%s - %s', cal.id, cal.summary);
-                    if ((cal.id.indexOf('#contacts@') == -1) && (cal.id.indexOf('#holiday@') == -1)) { //ignore the 'contacts' and 'holiday' calendars
+                    console.log('%s - %s', cal.id, cal.summary);
+                    if ( (cal.id.indexOf('group.v.calendar.google.com') == -1) /*(cal.id.indexOf('#contacts@') == -1) && (cal.id.indexOf('#holiday@') == -1) && (cal.id.indexOf('#weather@') == -1)*/) { //ignore the 'contacts' and 'holiday' and 'weather' calendars actually we need to ignore all calendar widgets that don't have events with a length (aka attendees)
                         calendarIds.push(cal.id);
                     }
                 }
@@ -51,7 +51,7 @@ function getEvents(auth, calId) {
             orderBy: 'startTime'
         }, function (err, response) {
             if (err) {
-                console.log('The API returned an error: ' + err);
+                console.log('The API returned an error in getEvents: ' + err);
                 return;
             }
             var events = response.items;
@@ -79,6 +79,7 @@ function getEvents(auth, calId) {
                         //Do nothing as we don't care about events that are all day or have no attendees
                     }
                 }
+                console.log("Gets to filtered events")
                 resolve(filteredEvents);
             }
         });

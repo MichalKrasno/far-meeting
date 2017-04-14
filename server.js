@@ -16,11 +16,15 @@ var google = require('googleapis');
 var OAuth2 = google.auth.OAuth2;
 var filtering = require("./filtering");
 
-//Google API info
+var gClientId = process.env.g_client_id;
+var gSecret = process.env.g_secret;
+var gRedirect = process.env.g_redirect;
+
+//Google API info FAR google API keys
 var oauth2Client = new OAuth2(
-    "963711263702-rfkieaohjall5iaci8258216qajdlt1u.apps.googleusercontent.com", //client_id
-    "lJzore0LfsSa6EJzD3sIj2LY", // Secret
-    "https://calendartest25.herokuapp.com/histogram" //Redirection URL - Should match with redirect url in google console
+    gClientId,
+    gSecret,
+    gRedirect
 );
 
 
